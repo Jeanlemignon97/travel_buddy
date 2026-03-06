@@ -48,12 +48,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 color: colorScheme.primary,
               ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Column(
         children: [

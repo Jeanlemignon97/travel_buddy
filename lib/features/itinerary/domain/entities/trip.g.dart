@@ -11,6 +11,7 @@ _$TripImpl _$$TripImplFromJson(Map<String, dynamic> json) => _$TripImpl(
   title: json['title'] as String,
   destination: json['destination'] as String,
   date: DateTime.parse(json['date'] as String),
+  userId: json['userId'] as String?,
 );
 
 Map<String, dynamic> _$$TripImplToJson(_$TripImpl instance) =>
@@ -19,4 +20,5 @@ Map<String, dynamic> _$$TripImplToJson(_$TripImpl instance) =>
       'title': instance.title,
       'destination': instance.destination,
       'date': instance.date.toIso8601String(),
+      'userId': instance.userId,
     };

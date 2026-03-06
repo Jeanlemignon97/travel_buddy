@@ -21,10 +21,21 @@ Trip _$TripFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Trip {
+  /// Identifiant unique du trajet (clé du document Firestore).
   String get id => throw _privateConstructorUsedError;
+
+  /// Titre descriptif du trajet affiché dans l'interface.
   String get title => throw _privateConstructorUsedError;
+
+  /// Destination principale du voyage (ville, pays).
   String get destination => throw _privateConstructorUsedError;
+
+  /// Date de départ ou de début du voyage.
   DateTime get date => throw _privateConstructorUsedError;
+
+  /// Identifiant de l'utilisateur ayant créé ce voyage.
+  /// Peut être null pour les anciens voyages locaux créés avant l'implémentation de l'Auth.
+  String? get userId => throw _privateConstructorUsedError;
 
   /// Serializes this Trip to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -40,7 +51,13 @@ abstract class $TripCopyWith<$Res> {
   factory $TripCopyWith(Trip value, $Res Function(Trip) then) =
       _$TripCopyWithImpl<$Res, Trip>;
   @useResult
-  $Res call({String id, String title, String destination, DateTime date});
+  $Res call({
+    String id,
+    String title,
+    String destination,
+    DateTime date,
+    String? userId,
+  });
 }
 
 /// @nodoc
@@ -62,6 +79,7 @@ class _$TripCopyWithImpl<$Res, $Val extends Trip>
     Object? title = null,
     Object? destination = null,
     Object? date = null,
+    Object? userId = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -81,6 +99,10 @@ class _$TripCopyWithImpl<$Res, $Val extends Trip>
                 ? _value.date
                 : date // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            userId: freezed == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -95,7 +117,13 @@ abstract class _$$TripImplCopyWith<$Res> implements $TripCopyWith<$Res> {
   ) = __$$TripImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String title, String destination, DateTime date});
+  $Res call({
+    String id,
+    String title,
+    String destination,
+    DateTime date,
+    String? userId,
+  });
 }
 
 /// @nodoc
@@ -114,6 +142,7 @@ class __$$TripImplCopyWithImpl<$Res>
     Object? title = null,
     Object? destination = null,
     Object? date = null,
+    Object? userId = freezed,
   }) {
     return _then(
       _$TripImpl(
@@ -133,6 +162,10 @@ class __$$TripImplCopyWithImpl<$Res>
             ? _value.date
             : date // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        userId: freezed == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -146,23 +179,36 @@ class _$TripImpl implements _Trip {
     required this.title,
     required this.destination,
     required this.date,
+    this.userId,
   });
 
   factory _$TripImpl.fromJson(Map<String, dynamic> json) =>
       _$$TripImplFromJson(json);
 
+  /// Identifiant unique du trajet (clé du document Firestore).
   @override
   final String id;
+
+  /// Titre descriptif du trajet affiché dans l'interface.
   @override
   final String title;
+
+  /// Destination principale du voyage (ville, pays).
   @override
   final String destination;
+
+  /// Date de départ ou de début du voyage.
   @override
   final DateTime date;
 
+  /// Identifiant de l'utilisateur ayant créé ce voyage.
+  /// Peut être null pour les anciens voyages locaux créés avant l'implémentation de l'Auth.
+  @override
+  final String? userId;
+
   @override
   String toString() {
-    return 'Trip(id: $id, title: $title, destination: $destination, date: $date)';
+    return 'Trip(id: $id, title: $title, destination: $destination, date: $date, userId: $userId)';
   }
 
   @override
@@ -174,12 +220,14 @@ class _$TripImpl implements _Trip {
             (identical(other.title, title) || other.title == title) &&
             (identical(other.destination, destination) ||
                 other.destination == destination) &&
-            (identical(other.date, date) || other.date == date));
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.userId, userId) || other.userId == userId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, destination, date);
+  int get hashCode =>
+      Object.hash(runtimeType, id, title, destination, date, userId);
 
   /// Create a copy of Trip
   /// with the given fields replaced by the non-null parameter values.
@@ -201,18 +249,31 @@ abstract class _Trip implements Trip {
     required final String title,
     required final String destination,
     required final DateTime date,
+    final String? userId,
   }) = _$TripImpl;
 
   factory _Trip.fromJson(Map<String, dynamic> json) = _$TripImpl.fromJson;
 
+  /// Identifiant unique du trajet (clé du document Firestore).
   @override
   String get id;
+
+  /// Titre descriptif du trajet affiché dans l'interface.
   @override
   String get title;
+
+  /// Destination principale du voyage (ville, pays).
   @override
   String get destination;
+
+  /// Date de départ ou de début du voyage.
   @override
   DateTime get date;
+
+  /// Identifiant de l'utilisateur ayant créé ce voyage.
+  /// Peut être null pour les anciens voyages locaux créés avant l'implémentation de l'Auth.
+  @override
+  String? get userId;
 
   /// Create a copy of Trip
   /// with the given fields replaced by the non-null parameter values.

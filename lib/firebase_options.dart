@@ -63,6 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '589232610494',
     projectId: 'travel-buddy-a7cba',
     storageBucket: 'travel-buddy-a7cba.firebasestorage.app',
+    androidClientId: '589232610494-sn2fe5997vjfqccl42pd67rhpqj6en9h.apps.googleusercontent.com',
+    iosClientId: '589232610494-jl9tj2p449v7l8n9c9p18nk5lo014kl9.apps.googleusercontent.com',
     iosBundleId: 'com.jetravelplus.travelbuddy',
   );
 

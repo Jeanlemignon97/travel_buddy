@@ -31,16 +31,16 @@ void main() async {
   runApp(const ProviderScope(child: TravelBuddyApp()));
 }
 
-class TravelBuddyApp extends StatelessWidget {
+class TravelBuddyApp extends ConsumerWidget {
   const TravelBuddyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'Travel Buddy',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

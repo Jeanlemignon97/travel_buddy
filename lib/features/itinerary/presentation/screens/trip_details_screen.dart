@@ -6,6 +6,9 @@ import '../../../../core/di/injection.dart';
 import '../../domain/entities/trip.dart';
 import '../../domain/repositories/i_itinerary_repository.dart';
 import '../providers/itinerary_provider.dart';
+import '../widgets/add_trip_bottom_sheet.dart';
+
+/// Un écran affichant les détails d'un trajet spécifique, permettant de voir les
 /// lieux associés (à venir), et de supprimer le trajet.
 class TripDetailsScreen extends ConsumerWidget {
   const TripDetailsScreen({
@@ -26,6 +29,11 @@ class TripDetailsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(trip.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Modifier ce trajet',
+            onPressed: () => _showEditSheet(context),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             color: colorScheme.error,
@@ -182,6 +190,18 @@ class TripDetailsScreen extends ConsumerWidget {
       height: 60,
       color: Colors.grey[300],
       child: const Icon(Icons.image_not_supported, color: Colors.grey),
+    );
+  }
+
+  void _showEditSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => AddTripBottomSheet(trip: trip),
     );
   }
 

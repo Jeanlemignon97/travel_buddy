@@ -34,6 +34,10 @@ class Trip with _$Trip {
 
     /// Date de départ ou de début du voyage.
     required DateTime date,
+
+    /// Identifiant de l'utilisateur ayant créé ce voyage.
+    /// Peut être null pour les anciens voyages locaux créés avant l'implémentation de l'Auth.
+    String? userId,
   }) = _Trip;
 
   /// Désérialise un [Trip] depuis une [Map] JSON (ex : snapshot Firestore).

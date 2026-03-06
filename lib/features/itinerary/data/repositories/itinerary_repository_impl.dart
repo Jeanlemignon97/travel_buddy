@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
@@ -15,27 +16,30 @@ import '../../domain/repositories/i_itinerary_repository.dart';
 @LazySingleton(as: IItineraryRepository)
 class ItineraryRepositoryImpl implements IItineraryRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _firebaseAuth;
 
   static const String _collection = 'trips';
 
-  /// Crée l'implémentation en injectant l'instance [FirebaseFirestore].
-  ItineraryRepositoryImpl(this._firestore);
+  /// Crée l'implémentation en injectant l'instance [FirebaseFirestore] et [FirebaseAuth].
+  ItineraryRepositoryImpl(this._firestore, this._firebaseAuth);
 
-  /// Retourne un [Stream] en temps réel de tous les trajets triés par date.
+  /// Retourne un [Stream] en temps réel de tous les trajets de l'utilisateur.
   ///
   /// Les mises à jour Firestore sont reflétées immédiatement dans le stream.
-  /// Les [Timestamp] Firestore sont convertis en [DateTime] pour correspondre
-  /// au modèle [Trip].
-  ///
-  /// Lève une exception si la lecture Firestore échoue.
+  /// Filtre les trajets pour ne renvoyer que ceux créés par l'utilisateur connecté.
   @override
   Stream<List<Trip>> getTrips() {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
     return _firestore
         .collection(_collection)
-        .orderBy('date', descending: false)
+        .where('userId', isEqualTo: user.uid)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
+      final trips = snapshot.docs.map((doc) {
         final data = doc.data();
         // Insert the document ID directly into the map to ensure Freezed parses it
         data['id'] = doc.id;
@@ -46,6 +50,10 @@ class ItineraryRepositoryImpl implements IItineraryRepository {
         }
         return Trip.fromJson(data);
       }).toList();
+
+      // Tri local (client-side) pour éviter le besoin d'un index composite Firestore
+      trips.sort((a, b) => a.date.compareTo(b.date));
+      return trips;
     });
   }
 
@@ -63,6 +71,13 @@ class ItineraryRepositoryImpl implements IItineraryRepository {
     final data = trip.toJson();
     // Convert DateTime to Firestore Timestamp for proper querying
     data['date'] = Timestamp.fromDate(trip.date);
+    
+    // Attacher l'ID de l'utilisateur connecté s'il existe
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      data['userId'] = user.uid;
+    }
+
     if (trip.id.isNotEmpty) {
       await _firestore.collection(_collection).doc(trip.id).set(data);
     } else {

@@ -40,6 +40,11 @@ class MainScreen extends StatelessWidget {
             selectedIcon: Icon(Icons.map),
             label: 'Itinéraires',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profil',
+          ),
         ],
       ),
     );

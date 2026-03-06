@@ -17,9 +17,16 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$Place {
+  /// Identifiant unique du lieu (ex: id provenant de l'API).
   String get id => throw _privateConstructorUsedError;
+
+  /// Nom affiché du lieu (ex: "Paris", "Tour Eiffel").
   String get name => throw _privateConstructorUsedError;
+
+  /// Courte description du lieu destinée à l'affichage dans les cartes.
   String get description => throw _privateConstructorUsedError;
+
+  /// URL de l'image représentative du lieu.
   String get imageUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of Place
@@ -143,12 +150,19 @@ class _$PlaceImpl implements _Place {
     required this.imageUrl,
   });
 
+  /// Identifiant unique du lieu (ex: id provenant de l'API).
   @override
   final String id;
+
+  /// Nom affiché du lieu (ex: "Paris", "Tour Eiffel").
   @override
   final String name;
+
+  /// Courte description du lieu destinée à l'affichage dans les cartes.
   @override
   final String description;
+
+  /// URL de l'image représentative du lieu.
   @override
   final String imageUrl;
 
@@ -190,12 +204,19 @@ abstract class _Place implements Place {
     required final String imageUrl,
   }) = _$PlaceImpl;
 
+  /// Identifiant unique du lieu (ex: id provenant de l'API).
   @override
   String get id;
+
+  /// Nom affiché du lieu (ex: "Paris", "Tour Eiffel").
   @override
   String get name;
+
+  /// Courte description du lieu destinée à l'affichage dans les cartes.
   @override
   String get description;
+
+  /// URL de l'image représentative du lieu.
   @override
   String get imageUrl;
 

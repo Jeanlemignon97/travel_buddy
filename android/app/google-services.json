@@ -12,7 +12,20 @@
           "package_name": "com.jetravelplus.travelbuddy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "589232610494-sn2fe5997vjfqccl42pd67rhpqj6en9h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jetravelplus.travelbuddy",
+            "certificate_hash": "d2219b90f7eb192272b34e79da334ce4e61c1a8b"
+          }
+        },
+        {
+          "client_id": "589232610494-bf9i80oda2i7ptslvr03sq8msrplg13g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDCpcwOh29hq3O5DP0kYlA1oyP12ZF7BJg"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "589232610494-bf9i80oda2i7ptslvr03sq8msrplg13g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "589232610494-jl9tj2p449v7l8n9c9p18nk5lo014kl9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jetravelplus.travelbuddy"
+              }
+            }
+          ]
         }
       }
     }

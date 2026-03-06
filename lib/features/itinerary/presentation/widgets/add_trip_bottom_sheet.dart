@@ -11,7 +11,8 @@ import '../../../search/domain/repositories/i_search_repository.dart';
 /// Contient un formulaire avec des champs pour le titre, la destination
 /// et la date. Utilise [IItineraryRepository] via GetIt pour la persistance.
 class AddTripBottomSheet extends ConsumerStatefulWidget {
-  const AddTripBottomSheet({super.key});
+  final Trip? trip;
+  const AddTripBottomSheet({this.trip, super.key});
 
   @override
   ConsumerState<AddTripBottomSheet> createState() => _AddTripBottomSheetState();
@@ -19,10 +20,18 @@ class AddTripBottomSheet extends ConsumerStatefulWidget {
 
 class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _destinationController = TextEditingController();
-  DateTime _selectedDate = DateTime.now().add(const Duration(days: 30));
+  late final TextEditingController _titleController;
+  late final TextEditingController _destinationController;
+  late DateTime _selectedDate;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.trip?.title ?? '');
+    _destinationController = TextEditingController(text: widget.trip?.destination ?? '');
+    _selectedDate = widget.trip?.date ?? DateTime.now().add(const Duration(days: 30));
+  }
 
   @override
   void dispose() {
@@ -35,8 +44,8 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      firstDate: DateTime.now().isAfter(_selectedDate) ? _selectedDate : DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -46,10 +55,11 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
     setState(() => _isLoading = true);
     try {
       final trip = Trip(
-        id: '',
+        id: widget.trip?.id ?? '',
         title: _titleController.text.trim(),
         destination: _destinationController.text.trim(),
         date: _selectedDate,
+        userId: widget.trip?.userId,
       );
       await getIt<IItineraryRepository>().addTrip(trip);
       if (mounted) Navigator.of(context).pop();
@@ -71,6 +81,7 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isEditing = widget.trip != null;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -99,14 +110,13 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
             ),
 
             Text(
-              'Nouveau trajet',
+              isEditing ? 'Modifier le trajet' : 'Nouveau trajet',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 24),
-
-            // Champ titre
+            // ... (rest of the fields unchanged except for the validation/text)
             TextFormField(
               controller: _titleController,
               decoration: const InputDecoration(
@@ -121,18 +131,15 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Champ destination avec Autocomplete (Villes)
             Autocomplete<String>(
+              initialValue: TextEditingValue(text: _destinationController.text),
               optionsBuilder: (TextEditingValue textEditingValue) async {
                 final query = textEditingValue.text;
                 if (query.trim().isEmpty) return const Iterable<String>.empty();
-                
-                // Petit délai pour éviter de spammer l'API
                 await Future.delayed(const Duration(milliseconds: 300));
                 if (query != textEditingValue.text) {
                   return const Iterable<String>.empty();
                 }
-
                 try {
                   final repo = getIt<ISearchRepository>();
                   return await repo.getCityPredictions(query);
@@ -147,7 +154,11 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
                   TextEditingController fieldTextEditingController,
                   FocusNode fieldFocusNode,
                   VoidCallback onFieldSubmitted) {
-                // Synchroniser notre contrôleur pour la soumission
+                // Synchroniser au démarrage seulement si c'est vide ou initial
+                if (fieldTextEditingController.text.isEmpty && _destinationController.text.isNotEmpty) {
+                    fieldTextEditingController.text = _destinationController.text;
+                }
+                
                 fieldTextEditingController.addListener(() {
                   _destinationController.text = fieldTextEditingController.text;
                 });
@@ -179,7 +190,7 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: 200,
-                        maxWidth: MediaQuery.of(context).size.width - 48, // Padding de la modale
+                        maxWidth: MediaQuery.of(context).size.width - 48,
                       ),
                       child: ListView.builder(
                         padding: EdgeInsets.zero,
@@ -209,7 +220,6 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Sélecteur de date
             InkWell(
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(8),
@@ -229,7 +239,6 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
             ),
             const SizedBox(height: 28),
 
-            // Bouton de validation
             SizedBox(
               width: double.infinity,
               child: FilledButton(
@@ -246,9 +255,9 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'Ajouter le trajet',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                    : Text(
+                        isEditing ? 'Enregistrer les modifications' : 'Ajouter le trajet',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
               ),
             ),
