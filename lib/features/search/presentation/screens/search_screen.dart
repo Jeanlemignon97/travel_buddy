@@ -30,6 +30,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[SearchScreen] Starting build...');
     final searchState = ref.watch(searchProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
