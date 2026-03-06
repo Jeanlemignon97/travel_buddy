@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/search_provider.dart';
 import '../widgets/place_card.dart';
@@ -86,10 +87,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   itemCount: places.length,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: PlaceCard(place: places[index]),
-                  ),
+                  itemBuilder: (context, index) {
+                    final place = places[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: PlaceCard(
+                        place: place,
+                        onTap: () {
+                          context.push('/placeDetails', extra: place);
+                        },
+                      ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/itinerary_provider.dart';
 import '../widgets/add_trip_bottom_sheet.dart';
@@ -59,10 +60,18 @@ class ItineraryScreen extends ConsumerWidget {
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             itemCount: trips.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: TripCard(trip: trips[index]),
-            ),
+            itemBuilder: (context, index) {
+              final trip = trips[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TripCard(
+                  trip: trip,
+                  onTap: () {
+                    context.push('/itinerary/tripDetails', extra: trip);
+                  },
+                ),
+              );
+            },
           );
         },
       ),

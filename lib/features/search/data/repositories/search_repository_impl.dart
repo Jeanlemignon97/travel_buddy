@@ -63,4 +63,48 @@ class SearchRepositoryImpl implements ISearchRepository {
       throw Exception('Erreur lors de la recherche Google Places : $e');
     }
   }
+
+  @override
+  Future<List<String>> getCityPredictions(String query) async {
+    if (query.trim().isEmpty) return [];
+
+    try {
+      final apiKey = DefaultFirebaseOptions.currentPlatform.apiKey;
+      final Map<String, dynamic> headers = {
+        'X-Goog-Api-Key': apiKey,
+      };
+
+      if (!kIsWeb) {
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          headers['X-Android-Package'] = 'com.jetravelplus.travelbuddy';
+          headers['X-Android-Cert'] = 'D2219B90F7EB192272B34E79DA334CE4E61C1A8B';
+        } else if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+          headers['X-Ios-Bundle-Identifier'] = 'com.jetravelplus.travelbuddy';
+        }
+      }
+
+      final response = await _dioClient.dio.post(
+        '/v1/places:autocomplete',
+        data: {
+          'input': query,
+          'includedPrimaryTypes': ['(cities)'],
+        },
+        options: Options(headers: headers),
+      );
+
+      final List<dynamic> suggestionsJson = response.data['suggestions'] ?? [];
+      
+      return suggestionsJson.map((json) {
+        final prediction = json['placePrediction'];
+        if (prediction != null) {
+          final text = prediction['text']?['text'] as String?;
+          if (text != null) return text;
+        }
+        return '';
+      }).where((str) => str.isNotEmpty).toList();
+    } catch (e) {
+      // En cas d'erreur réseau, on retourne une liste vide pour ne pas bloquer l'UI
+      return [];
+    }
+  }
 }

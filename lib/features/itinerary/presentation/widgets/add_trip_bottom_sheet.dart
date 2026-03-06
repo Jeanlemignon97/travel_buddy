@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/trip.dart';
 import '../../domain/repositories/i_itinerary_repository.dart';
+import '../../../search/domain/repositories/i_search_repository.dart';
 
 /// Bottom sheet permettant à l'utilisateur de créer un nouveau [Trip].
 ///
@@ -120,18 +121,91 @@ class _AddTripBottomSheetState extends ConsumerState<AddTripBottomSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Champ destination
-            TextFormField(
-              controller: _destinationController,
-              decoration: const InputDecoration(
-                labelText: 'Destination',
-                hintText: 'Ex: Tokyo, Japon',
-                prefixIcon: Icon(Icons.location_on_outlined),
-                border: OutlineInputBorder(),
-              ),
-              textCapitalization: TextCapitalization.words,
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+            // Champ destination avec Autocomplete (Villes)
+            Autocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) async {
+                final query = textEditingValue.text;
+                if (query.trim().isEmpty) return const Iterable<String>.empty();
+                
+                // Petit délai pour éviter de spammer l'API
+                await Future.delayed(const Duration(milliseconds: 300));
+                if (query != textEditingValue.text) {
+                  return const Iterable<String>.empty();
+                }
+
+                try {
+                  final repo = getIt<ISearchRepository>();
+                  return await repo.getCityPredictions(query);
+                } catch (e) {
+                  return const Iterable<String>.empty();
+                }
+              },
+              onSelected: (String selection) {
+                _destinationController.text = selection;
+              },
+              fieldViewBuilder: (BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted) {
+                // Synchroniser notre contrôleur pour la soumission
+                fieldTextEditingController.addListener(() {
+                  _destinationController.text = fieldTextEditingController.text;
+                });
+                
+                return TextFormField(
+                  controller: fieldTextEditingController,
+                  focusNode: fieldFocusNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Destination (Ville)',
+                    hintText: 'Ex: Tokyo, Japon',
+                    prefixIcon: Icon(Icons.location_on_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4,
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 200,
+                        maxWidth: MediaQuery.of(context).size.width - 48, // Padding de la modale
+                      ),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return InkWell(
+                            onTap: () => onSelected(option),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.location_city, size: 20, color: Colors.grey),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: Text(option)),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 

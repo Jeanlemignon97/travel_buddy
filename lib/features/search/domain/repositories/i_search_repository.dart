@@ -15,4 +15,8 @@ abstract class ISearchRepository {
   /// Le paramètre [query] doit être une chaîne non vide (validée en amont
   /// dans [SearchPlacesUseCase]).
   Future<List<Place>> searchPlaces(String query);
+
+  /// Retourne une liste de suggestions de villes sous forme de chaîne de caractères
+  /// (ex: "Paris, France") basée sur une saisie partielle.
+  Future<List<String>> getCityPredictions(String query);
 }

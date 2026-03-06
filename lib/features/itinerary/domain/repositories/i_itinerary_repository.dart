@@ -1,4 +1,5 @@
 import '../../domain/entities/trip.dart';
+import '../../../search/domain/entities/place.dart';
 
 /// Contrat d'accès aux données pour la fonctionnalité d'itinéraires.
 ///
@@ -15,7 +16,19 @@ abstract class IItineraryRepository {
 
   /// Persiste un nouveau [trip] dans la source de données.
   ///
-  /// Si le trip possède un [Trip.id] non vide, l'opération est un `set` (upsert).
-  /// Sinon, Firestore génère un identifiant unique automatiquement.
   Future<void> addTrip(Trip trip);
+
+  /// Supprime un [Trip] existant de la source de données via son [tripId].
+  Future<void> deleteTrip(String tripId);
+
+  // ── Gestion des Lieux liés aux Trajets (Sous-collections) ──
+
+  /// Ajoute un [Place] provenant de la recherche à un [Trip] spécifique.
+  Future<void> addPlaceToTrip(String tripId, Place place);
+
+  /// Retourne la liste en temps réel des lieux sauvegardés pour un [Trip] donné.
+  Stream<List<Place>> getPlacesForTrip(String tripId);
+
+  /// Retire un lieu spécifique d'un [Trip].
+  Future<void> removePlaceFromTrip(String tripId, String placeId);
 }
