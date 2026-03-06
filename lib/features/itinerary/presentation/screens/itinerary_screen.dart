@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/itinerary_provider.dart';
 import '../widgets/add_trip_bottom_sheet.dart';
 import '../widgets/trip_card.dart';
+import '../widgets/trip_card_skeleton.dart';
 
 /// Écran affichant les itinéraires de l'utilisateur en temps réel depuis Firestore.
 ///
@@ -51,7 +52,14 @@ class ItineraryScreen extends ConsumerWidget {
         label: const Text('Nouveau trajet'),
       ),
       body: tripsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          itemCount: 5,
+          itemBuilder: (context, index) => const Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: TripCardSkeleton(),
+          ),
+        ),
         error: (error, _) => _ItineraryError(message: error.toString()),
         data: (trips) {
           if (trips.isEmpty) {

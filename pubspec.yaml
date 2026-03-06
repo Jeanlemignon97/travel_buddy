@@ -47,6 +47,7 @@ dependencies:
   firebase_messaging: ^14.7.19
   google_fonts: ^8.0.2
   fake_cloud_firestore: ^2.5.2
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

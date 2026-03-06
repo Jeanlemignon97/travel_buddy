@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/search_provider.dart';
 import '../widgets/place_card.dart';
+import '../widgets/place_card_skeleton.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/search_empty_state.dart';
 
@@ -63,7 +64,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // ── Corps dynamique ─────────────────────────────────────────
           Expanded(
             child: searchState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                itemCount: 3,
+                itemBuilder: (context, index) => const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: PlaceCardSkeleton(),
+                ),
+              ),
               error: (error, _) => _ErrorView(
                 message: error.toString(),
                 onRetry: () => ref.read(searchProvider.notifier).search(_query),
