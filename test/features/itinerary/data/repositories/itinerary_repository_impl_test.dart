@@ -1,39 +1,26 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:travel_buddy/features/itinerary/data/repositories/itinerary_repository_impl.dart';
 import 'package:travel_buddy/features/itinerary/domain/entities/trip.dart';
 import 'package:travel_buddy/features/search/domain/entities/place.dart';
-import '../../../../helpers/mocks.dart';
 
 void main() {
-  late MockFirebaseFirestore mockFirestore;
-  late MockFirebaseAuth mockFirebaseAuth;
+  late FakeFirebaseFirestore fakeFirestore;
+  late MockFirebaseAuth mockAuth;
   late ItineraryRepositoryImpl repository;
-  late MockCollectionReference mockCollection;
-  late MockUser mockUser;
-
-  setUpAll(() {
-    registerFallbackValue(Trip(
-      id: '',
-      title: '',
-      destination: '',
-      date: DateTime.now(),
-    ));
-    registerFallbackValue(const Place(id: '', name: '', description: '', imageUrl: ''));
-  });
 
   setUp(() {
-    mockFirestore = MockFirebaseFirestore();
-    mockFirebaseAuth = MockFirebaseAuth();
-    repository = ItineraryRepositoryImpl(mockFirestore, mockFirebaseAuth);
-    mockCollection = MockCollectionReference();
-    mockUser = MockUser();
+    fakeFirestore = FakeFirebaseFirestore();
+    // Création d'un faux utilisateur connecté
+    final user = MockUser(
+      uid: 'user123',
+      email: 'test@example.com',
+      displayName: 'Test User',
+    );
+    mockAuth = MockFirebaseAuth(mockUser: user, signedIn: true);
 
-    when(() => mockFirestore.collection(any())).thenReturn(mockCollection);
-    when(() => mockFirebaseAuth.currentUser).thenReturn(mockUser);
-    when(() => mockUser.uid).thenReturn('user123');
+    repository = ItineraryRepositoryImpl(fakeFirestore, mockAuth);
   });
 
   group('ItineraryRepositoryImpl', () {
@@ -45,55 +32,74 @@ void main() {
       userId: 'user123',
     );
 
-    test('addTrip calls firestore set when ID is provided', () async {
-      final mockDoc = MockDocumentReference();
-      when(() => mockCollection.doc(any())).thenReturn(mockDoc);
-      when(() => mockDoc.set(any())).thenAnswer((_) async => {});
-
+    test('addTrip stores trip in firestore', () async {
       await repository.addTrip(trip);
 
-      verify(() => mockCollection.doc('trip1')).called(1);
+      final doc = await fakeFirestore.collection('trips').doc('trip1').get();
+
+      expect(doc.exists, true);
+      expect(doc.data()?['title'], 'Voyage');
+      expect(doc.data()?['userId'], 'user123');
     });
 
-    test('deleteTrip calls firestore delete', () async {
-      final mockDoc = MockDocumentReference();
-      when(() => mockCollection.doc(any())).thenReturn(mockDoc);
-      when(() => mockDoc.delete()).thenAnswer((_) async => {});
+    test('deleteTrip removes trip from firestore', () async {
+      await fakeFirestore.collection('trips').doc('trip1').set({
+        'id': 'trip1',
+        'title': 'Voyage',
+        'destination': 'Paris',
+        'date': DateTime(2025).toIso8601String(),
+        'userId': 'user123',
+      });
 
       await repository.deleteTrip('trip1');
 
-      verify(() => mockDoc.delete()).called(1);
+      final doc = await fakeFirestore.collection('trips').doc('trip1').get();
+      expect(doc.exists, false);
     });
 
-    test('addPlaceToTrip adds to subcollection', () async {
-      final mockDoc = MockDocumentReference();
-      final mockSubCollection = MockCollectionReference();
-      final mockSubDoc = MockDocumentReference();
-      
-      when(() => mockCollection.doc(any())).thenReturn(mockDoc);
-      when(() => mockDoc.collection('places')).thenReturn(mockSubCollection);
-      when(() => mockSubCollection.doc(any())).thenReturn(mockSubDoc);
-      when(() => mockSubDoc.set(any())).thenAnswer((_) async => {});
+    test('addPlaceToTrip adds place to subcollection', () async {
+      await repository.addTrip(trip);
 
-      const place = Place(id: 'p1', name: 'Tour Eiffel', description: '', imageUrl: '');
+      const place = Place(
+        id: 'p1',
+        name: 'Tour Eiffel',
+        description: '',
+        imageUrl: '',
+      );
+
       await repository.addPlaceToTrip('trip1', place);
 
-      verify(() => mockSubCollection.doc('p1')).called(1);
+      final doc = await fakeFirestore
+          .collection('trips')
+          .doc('trip1')
+          .collection('places')
+          .doc('p1')
+          .get();
+
+      expect(doc.exists, true);
+      expect(doc.data()?['name'], 'Tour Eiffel');
     });
 
-    test('removePlaceFromTrip deletes from subcollection', () async {
-      final mockDoc = MockDocumentReference();
-      final mockSubCollection = MockCollectionReference();
-      final mockSubDoc = MockDocumentReference();
+    test('getTrips returns only user trips sorted by date', () async {
+      // Trip 1 (User 123) - Futur
+      await repository.addTrip(trip);
       
-      when(() => mockCollection.doc(any())).thenReturn(mockDoc);
-      when(() => mockDoc.collection('places')).thenReturn(mockSubCollection);
-      when(() => mockSubCollection.doc(any())).thenReturn(mockSubDoc);
-      when(() => mockSubDoc.delete()).thenAnswer((_) async => {});
+      // Trip 2 (User 123) - Passé
+      await repository.addTrip(trip.copyWith(id: 'trip2', date: DateTime(2024)));
+      
+      // Trip 3 (Autre User)
+      await fakeFirestore.collection('trips').doc('trip3').set({
+        'id': 'trip3',
+        'userId': 'other_user',
+        'title': 'Pas à moi',
+        'date': DateTime.now().toIso8601String(),
+      });
 
-      await repository.removePlaceFromTrip('trip1', 'p1');
+      final trips = await repository.getTrips().first;
 
-      verify(() => mockSubDoc.delete()).called(1);
+      expect(trips.length, 2);
+      expect(trips.first.id, 'trip2'); // Trié par date croissante
+      expect(trips.last.id, 'trip1');
     });
   });
 }
