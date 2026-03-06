@@ -146,15 +146,19 @@ class TripDetailsScreen extends ConsumerWidget {
                             contentPadding: EdgeInsets.zero,
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: place.imageUrl.isNotEmpty
-                                  ? Image.network(
-                                      place.imageUrl,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-                                    )
-                                  : _buildPlaceholder(),
+                              child: Hero(
+                                tag: 'place_image_${place.id}',
+                                child: place.imageUrl.isNotEmpty
+                                    ? Image.network(
+                                        place.imageUrl,
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            _buildPlaceholder(),
+                                      )
+                                    : _buildPlaceholder(),
+                              ),
                             ),
                             title: Text(place.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                             trailing: IconButton(
