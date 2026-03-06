@@ -1,30 +1,13 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 
-// Placeholder pour l'écran de recherche
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+import '../../features/search/presentation/screens/search_screen.dart';
+import '../../features/itinerary/presentation/screens/itinerary_screen.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Search Screen')),
-    );
-  }
-}
-
-// Placeholder pour l'écran d'itinéraire
-class ItineraryScreen extends StatelessWidget {
-  const ItineraryScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Itinerary Screen')),
-    );
-  }
-}
-
+/// Configuration du routeur de l'application.
+///
+/// Utilise [GoRouter] avec deux routes principales :
+/// - `/` : [SearchScreen] — recherche de destinations
+/// - `/itinerary` : [ItineraryScreen] — gestion des trajets
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
