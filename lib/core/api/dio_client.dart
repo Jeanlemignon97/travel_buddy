@@ -22,7 +22,7 @@ class DioClient {
   DioClient()
       : _dio = Dio(
           BaseOptions(
-            baseUrl: 'https://api.example.com', // Base URL fictive pour l'instant
+            baseUrl: 'https://places.googleapis.com',
             connectTimeout: const Duration(seconds: 10),
             receiveTimeout: const Duration(seconds: 10),
           ),
