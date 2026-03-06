@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/di/injection.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
@@ -35,10 +36,7 @@ class TravelBuddyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Travel Buddy',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       routerConfig: appRouter,
     );
   }
