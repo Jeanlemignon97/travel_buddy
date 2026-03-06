@@ -5,22 +5,17 @@ import 'package:travel_buddy/features/auth/data/repositories/auth_repository_imp
 void main() {
   group('AuthRepositoryImpl with Fakes', () {
     test('signIn returns UserEntity on success', () async {
-      final user = MockUser(
-        uid: '123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-      );
       final mockAuth = MockFirebaseAuth();
       // On pré-enregistre l'utilisateur dans le faux Auth
-      // Note: firebase_auth_mocks gère la création si on veut, 
+      // Note: firebase_auth_mocks gère la création si on veut,
       // mais ici on teste le repository qui appelle l'API.
-      
+
       final repository = AuthRepositoryImpl(mockAuth);
 
-      // Pour simuler un compte existant dans le fake, on peut utiliser signUp d'abord 
-      // ou configurer le mockAuth plus finement. 
+      // Pour simuler un compte existant dans le fake, on peut utiliser signUp d'abord
+      // ou configurer le mockAuth plus finement.
       // Mais AuthRepositoryImpl.signIn appelle juste signInWithEmailAndPassword.
-      
+
       // Création de compte via le repo
       final signedUp = await repository.signUp('test@example.com', 'password');
       expect(signedUp.email, 'test@example.com');
@@ -42,21 +37,26 @@ void main() {
     });
 
     test('authStateChanges emits user then null', () async {
-      final user = MockUser(uid: '123');
       final mockAuth = MockFirebaseAuth();
       final repository = AuthRepositoryImpl(mockAuth);
 
       final stream = repository.authStateChanges();
-      
+
       // Simuler des changements
-      await mockAuth.createUserWithEmailAndPassword(email: 'a@b.com', password: '123');
+      await mockAuth.createUserWithEmailAndPassword(
+        email: 'a@b.com',
+        password: '123',
+      );
       await mockAuth.signOut();
 
-      expect(stream, emitsInOrder([
-        isNull, // État initial
-        isNotNull, // Après signUp/signIn
-        isNull, // Après signOut
-      ]));
+      expect(
+        stream,
+        emitsInOrder([
+          isNull, // État initial
+          isNotNull, // Après signUp/signIn
+          isNull, // Après signOut
+        ]),
+      );
     });
   });
 }
