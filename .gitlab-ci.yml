@@ -9,17 +9,18 @@ stages:
 
 # Cache des packages pour accélérer les pipelines
 cache:
-  key: ${CI_COMMIT_REF_SLUG}
+  key: ${CI_COMMIT_REF_SLUG} # Clé unique pour chaque branche
   paths:
     - .pub-cache/
     - .dart_tool/
 
 variables:
-  PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache"
-  PATH: "$PATH:$PUB_CACHE/bin"
+  PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache" # Cache des packages
+  #PATH: "$PATH:$PUB_CACHE/bin" # Path vers les binaires
 
 before_script:
-  - flutter pub get
+  - export PATH="$PATH:$PUB_CACHE/bin" # Path vers les binaires
+  - flutter pub get # Récupération des dépendances
 
 # Étape 1 : Analyse statique (Lints)
 analyze:
