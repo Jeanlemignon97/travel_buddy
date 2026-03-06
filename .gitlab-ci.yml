@@ -1,0 +1,48 @@
+image: ghcr.io/cirruslabs/flutter:stable
+
+stages:
+  - analyze
+  - test
+  - build
+
+# Cache des packages pour accélérer les pipelines
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pub-cache/
+    - .dart_tool/
+
+variables:
+  PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache"
+  PATH: "$PATH:$PUB_CACHE/bin"
+
+before_script:
+  - flutter pub get
+
+# Étape 1 : Analyse statique (Lints)
+analyze:
+  stage: analyze
+  script:
+    - flutter analyze
+
+# Étape 2 : Tests unitaires avec couverture
+test:
+  stage: test
+  script:
+    - flutter test --coverage
+  artifacts:
+    paths:
+      - coverage/
+    expire_in: 1 week
+
+# Étape 3 : Vérification de la compilation (Web)
+build_web:
+  stage: build
+  script:
+    - flutter build web
+  artifacts:
+    paths:
+      - build/web
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
