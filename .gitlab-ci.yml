@@ -1,4 +1,6 @@
-image: ghcr.io/cirruslabs/flutter:stable
+image:
+  name: ghcr.io/cirruslabs/flutter:stable
+  entrypoint: [""]
 
 stages:
   - analyze
