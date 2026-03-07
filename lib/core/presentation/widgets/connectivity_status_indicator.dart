@@ -9,17 +9,17 @@ class ConnectivityStatusIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectivityAsync = ref.watch(connectivityProvider);
-    
+
     return connectivityAsync.when(
       data: (status) {
         final isOnline = status == ConnectivityStatus.online;
-        
+
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isOnline 
-                ? Colors.green.withAlpha(30) 
+            color: isOnline
+                ? Colors.green.withAlpha(30)
                 : Colors.red.withAlpha(30),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -70,23 +70,31 @@ class ConnectivityStatusIndicator extends ConsumerWidget {
         ),
         child: const Text(
           'VÉRIFICATION...',
-          style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       // En cas d'erreur de stream (ex: sur Web), on affiche qu'on est en ligne par défaut pour ne pas effrayer l'utilisateur
-      error: (err, __) => Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.green.withAlpha(30),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.green, width: 1),
-          ),
-          child: const Text(
-            'EN LIGNE',
-            style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+      error: (err, _) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.green.withAlpha(30),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.green, width: 1),
+        ),
+        child: const Text(
+          'EN LIGNE',
+          style: TextStyle(
+            color: Colors.green,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
           ),
         ),
+      ),
     );
   }
 }
