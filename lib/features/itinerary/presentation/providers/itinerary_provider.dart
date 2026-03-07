@@ -20,3 +20,16 @@ final tripPlacesProvider = StreamProvider.family<List<Place>, String>((ref, trip
   final repository = getIt<IItineraryRepository>();
   return repository.getPlacesForTrip(tripId);
 });
+
+/// Fournisseur qui retourne un trajet spécifique à partir du pool de trajets chargés.
+/// Permet de garder l'écran de détails synchronisé si le trajet est modifié en DB.
+final singleTripProvider = Provider.family<Trip?, String>((ref, tripId) {
+  final tripsAsync = ref.watch(tripsProvider);
+  return tripsAsync.maybeWhen(
+    data: (trips) => trips.cast<Trip?>().firstWhere(
+          (t) => t?.id == tripId,
+          orElse: () => null,
+        ),
+    orElse: () => null,
+  );
+});

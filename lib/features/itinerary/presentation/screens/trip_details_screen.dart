@@ -21,24 +21,35 @@ class TripDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Écoute le trajet en temps réel pour refléter les modifications (ex: date)
+    final tripUpdate = ref.watch(singleTripProvider(trip.id));
+    final currentTrip = tripUpdate ?? trip;
+
+    // Si le trajet est supprimé du flux Firestore, on ferme l'écran
+    ref.listen(singleTripProvider(trip.id), (previous, next) {
+      if (next == null && context.mounted) {
+        context.pop();
+      }
+    });
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(trip.title),
+        title: Text(currentTrip.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Modifier ce trajet',
-            onPressed: () => _showEditSheet(context),
+            onPressed: () => _showEditSheet(context, currentTrip),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             color: colorScheme.error,
             tooltip: 'Supprimer ce trajet',
-            onPressed: () => _showDeleteConfirmation(context, ref),
+            onPressed: () => _showDeleteConfirmation(context, ref, currentTrip),
           ),
         ],
       ),
@@ -55,7 +66,7 @@ class TripDetailsScreen extends ConsumerWidget {
                   Icon(Icons.flight_takeoff, size: 64, color: colorScheme.primary),
                   const SizedBox(height: 16),
                   Text(
-                    trip.destination,
+                    currentTrip.destination,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -75,7 +86,7 @@ class TripDetailsScreen extends ConsumerWidget {
                         const Icon(Icons.calendar_month, size: 18),
                         const SizedBox(width: 8),
                         Text(
-                          _formatDate(trip.date),
+                          _formatDate(currentTrip.date),
                           style: theme.textTheme.titleMedium,
                         ),
                       ],
@@ -97,7 +108,7 @@ class TripDetailsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  ref.watch(tripPlacesProvider(trip.id)).when(
+                  ref.watch(tripPlacesProvider(currentTrip.id)).when(
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (err, stack) => Center(child: Text('Erreur: $err')),
                     data: (places) {
@@ -166,7 +177,7 @@ class TripDetailsScreen extends ConsumerWidget {
                               color: colorScheme.error,
                               onPressed: () async {
                                 final repo = ref.read(itineraryRepositoryProvider);
-                                await repo.removePlaceFromTrip(trip.id, place.id);
+                                await repo.removePlaceFromTrip(currentTrip.id, place.id);
                               },
                             ),
                             onTap: () {
@@ -197,7 +208,7 @@ class TripDetailsScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditSheet(BuildContext context) {
+  void _showEditSheet(BuildContext context, Trip currentTrip) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -205,17 +216,17 @@ class TripDetailsScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => AddTripBottomSheet(trip: trip),
+      builder: (_) => AddTripBottomSheet(trip: currentTrip),
     );
   }
 
   /// Ouvre une boîte de dialogue pour confirmer la suppression.
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, Trip currentTrip) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Supprimer ce trajet ?'),
-        content: Text('Le voyage vers ${trip.destination} sera définitivement supprimé.'),
+        content: Text('Le voyage vers ${currentTrip.destination} sera définitivement supprimé.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -230,13 +241,8 @@ class TripDetailsScreen extends ConsumerWidget {
               Navigator.of(ctx).pop(); // Fermer la modale
               try {
                 final repo = getIt<IItineraryRepository>();
-                await repo.deleteTrip(trip.id);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Le trajet a été supprimé.')),
-                  );
-                  context.pop(); // Retour à la liste
-                }
+                await repo.deleteTrip(currentTrip.id);
+                // Le pop global est géré par ref.listen ci-dessus
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

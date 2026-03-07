@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/presentation/widgets/connectivity_status_indicator.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -15,6 +16,9 @@ class ProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Mon Profil'),
         centerTitle: true,
+        actions: const [
+          ConnectivityStatusIndicator(),
+        ],
       ),
       body: authState.when(
         data: (user) {

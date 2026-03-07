@@ -7,6 +7,7 @@ import '../widgets/place_card.dart';
 import '../widgets/place_card_skeleton.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/search_empty_state.dart';
+import '../../../../core/presentation/widgets/connectivity_status_indicator.dart';
 
 /// Écran principal de recherche de destinations.
 ///
@@ -49,6 +50,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 color: colorScheme.primary,
               ),
         ),
+        actions: const [
+          ConnectivityStatusIndicator(),
+        ],
       ),
       body: Column(
         children: [

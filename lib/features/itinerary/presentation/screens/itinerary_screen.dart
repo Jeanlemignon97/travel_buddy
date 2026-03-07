@@ -6,6 +6,7 @@ import '../providers/itinerary_provider.dart';
 import '../widgets/add_trip_bottom_sheet.dart';
 import '../widgets/trip_card.dart';
 import '../widgets/trip_card_skeleton.dart';
+import '../../../../core/presentation/widgets/connectivity_status_indicator.dart';
 
 /// Écran affichant les itinéraires de l'utilisateur en temps réel depuis Firestore.
 ///
@@ -45,6 +46,9 @@ class ItineraryScreen extends ConsumerWidget {
                 color: colorScheme.primary,
               ),
         ),
+        actions: const [
+          ConnectivityStatusIndicator(),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAddTrip(context),
