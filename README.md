@@ -1,6 +1,6 @@
 # Travel Buddy 🧳
 
-Application mobile Flutter (iOS & Android) permettant de **rechercher des destinations** et de **gérer des itinéraires de voyage** en temps réel, avec un support de notifications push.
+Application mobile et web Flutter permettant de **rechercher des destinations** et de **gérer des itinéraires de voyage** en temps réel, avec une architecture robuste et une gestion avancée de la connectivité.
 
 ---
 
@@ -13,57 +13,37 @@ lib/
 ├── core/
 │   ├── api/             # Client HTTP (DioClient)
 │   ├── di/              # Injection de dépendances (GetIt + Injectable)
-│   ├── notifications/   # Service Firebase Cloud Messaging
+│   ├── notifications/   # Service Firebase Cloud Messaging & Web Service Worker
+│   ├── providers/       # Providers globaux (Connectivity, etc.)
 │   ├── router/          # Routage de l'application (GoRouter)
-│   └── theme/           # Thème global (à venir)
+│   └── theme/           # Design System & Thèmes
 │
 ├── features/
-│   ├── search/
-│   │   ├── data/
-│   │   │   ├── datasources/
-│   │   │   ├── models/        # PlaceModel (Freezed + JsonSerializable)
-│   │   │   └── repositories/  # SearchRepositoryImpl (Dio)
-│   │   ├── domain/
-│   │   │   ├── entities/      # Place
-│   │   │   ├── repositories/  # ISearchRepository (interface)
-│   │   │   └── usecases/      # SearchPlacesUseCase
-│   │   └── presentation/
-│   │       ├── providers/     # searchProvider (Riverpod StateNotifier)
-│   │       ├── screens/
-│   │       └── widgets/
-│   │
-│   └── itinerary/
-│       ├── data/
-│       │   └── repositories/  # ItineraryRepositoryImpl (Firestore)
-│       ├── domain/
-│       │   ├── entities/      # Trip (Freezed)
-│       │   ├── repositories/  # IItineraryRepository (interface)
-│       │   └── usecases/
-│       └── presentation/
-│           ├── providers/     # tripsProvider (Riverpod StreamProvider)
-│           ├── screens/
-│           └── widgets/
+│   ├── search/          # Recherche de lieux (Dio + Firestore)
+│   └── itinerary/       # Gestion des trajets (Firestore Real-time)
 │
-└── main.dart            # Point d'entrée (Firebase + GetIt + Riverpod)
+└── main.dart            # Configuration globale (Firebase, Theme, Router)
+
+functions/               # Cloud Functions (TypeScript)
+├── src/
+│   ├── triggers/        # Déclencheurs Firestore (ex: onTripCreated)
+│   ├── services/        # Logique métier (ex: Notifications FCM)
+│   └── models/          # Interfaces TypeScript partagées
 ```
 
-### Flux de données
+---
 
-```
-UI (Widget)
-   │
-   ▼
-Provider (Riverpod)   ◄──── StreamProvider pour Firestore (temps réel)
-   │
-   ▼
-UseCase (Domain)
-   │
-   ▼
-Repository Interface (Domain)
-   │
-   ▼
-Repository Impl (Data)  ──►  DioClient (REST API) / Firestore
-```
+## ✨ Fonctionnalités Clés
+
+- 🌐 **Monitoring Connectivité** : Indicateur visuel "En ligne/Hors-ligne" dynamique avec système de "Heartbeat" (ping) pour une fiabilité maximale sur Web et Mobile.
+- 🔄 **Synchro Temps Réel** : Les modifications de trajets (titre, dates) sont répercutées instantanément sur tous les écrans via des Streams Firestore réactifs.
+- ⚡ **Expérience UX Premium** :
+  - **Shimmer Skeletons** : Effets de chargement élégants pour les listes de lieux et de trajets.
+  - **Hero Animations** : Transitions fluides des images entre la recherche et les détails.
+- 🔔 **Notifications Push** :
+  - Support Multi-plateforme (iOS, Android, Web via Service Worker).
+  - Notifications en premier-plan (Foreground) via SnackBars globaux.
+  - Automation via Cloud Functions TypeScript.
 
 ---
 
@@ -71,93 +51,42 @@ Repository Impl (Data)  ──►  DioClient (REST API) / Firestore
 
 | Technologie | Rôle | Justification |
 |---|---|---|
-| **Flutter** | Framework UI cross-platform | Productivité, performances natives iOS/Android |
-| **Riverpod** | Gestion d'état | Type-safe, testable, pas de `BuildContext` requis |
-| **Dio** | Client HTTP | Intercepteurs, gestion d'erreurs avancée, timeouts |
-| **Freezed** | Modèles immutables | Sécurité, `copyWith`, `==`, `toString` auto-générés |
-| **GoRouter** | Navigation déclarative | Routage URL-based, deep links, guards |
-| **GetIt + Injectable** | Injection de dépendances | Léger, efficace, génération de code via annotations |
-| **Cloud Firestore** | Base de données temps réel | Streams natifs, synchronisation offline |
-| **Firebase Messaging** | Notifications push | Intégration Firebase unifiée |
-| **Mocktail** | Tests unitaires | API simple pour mocker les dépendances en Dart |
-
-### Principes appliqués
-
-- ✅ **Clean Architecture** – Séparation Domain / Data / Presentation
-- ✅ **SOLID** – Inversion de dépendance via les interfaces de repository
-- ✅ **Feature-first** – Organisation modulaire et scalable
-- ✅ **Immutabilité** – Modèles Freezed dans toutes les couches
+| **Flutter** | Framework UI | Productivité et consistance UI sur Mobile & Web |
+| **Riverpod** | Gestion d'état | Réactivité, Streams Firestore simplifiés, testabilité |
+| **Firebase** | Backend | Auth, Firestore (temps réel), Messaging, Cloud Functions |
+| **TypeScript** | Backend (Functions) | Typage fort pour une logique serveur sécurisée |
+| **Freezed** | Modèles | Immutabilité et sécurité des données |
+| **Shimmer** | Animation | Meilleure perception de la vitesse de chargement (UX) |
 
 ---
 
-## 🚀 Lancer le projet
+## 🚀 Installation et Déploiement
 
-### Prérequis
+### Application Flutter
+1. `flutter pub get`
+2. `dart run build_runner build --delete-conflicting-outputs`
+3. `flutterfire configure` (pour régénérer les configs Firebase)
+4. `flutter run`
 
-- Flutter SDK `^3.11.0`
-- Dart `^3.11.0`
-- Compte Firebase avec projet configuré
-- `flutterfire_cli` installé globalement
-
-### 1. Cloner et installer les dépendances
-
-```bash
-git clone git@gitlab.com:flutter_personal_project/travel_buddy.git
-cd travel_buddy
-flutter pub get
-```
-
-### 2. Configurer Firebase
-
-> ⚠️ Le fichier `google-services.json` (Android) et `GoogleService-Info.plist` (iOS) ne sont pas versionnés pour des raisons de sécurité. Vous devez les générer via la CLI Firebase :
-
-```bash
-# Installer flutterfire_cli si ce n'est pas fait
-dart pub global activate flutterfire_cli
-
-# Générer les fichiers de configuration Firebase
-flutterfire configure
-```
-
-### 3. Générer le code (Freezed, JsonSerializable, Injectable)
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
-
-### 4. Lancer l'application
-
-```bash
-flutter run
-```
-
-### 5. Lancer les tests
-
-```bash
-flutter test
-```
+### Cloud Functions
+1. `cd functions`
+2. `npm install`
+3. `npm run build`
+4. `firebase deploy --only functions`
 
 ---
 
-## 🧪 Tests
+## 🧪 Qualité & CI/CD
 
-Les tests unitaires se trouvent dans `test/` et suivent la même arborescence que `lib/`.
-
-```bash
-flutter test test/features/search/domain/usecases/search_places_usecase_test.dart
-```
-
-Couverture actuelle :
-
-| Use-Case | Tests |
-|---|---|
-| `SearchPlacesUseCase` | ✅ 5 cas (query valide, vide, espaces, exception, résultat vide) |
+- **Tests** : Utilisation de **Fakes Firebase** (`fake_cloud_firestore`, `firebase_auth_mocks`) pour des tests unitaires rapides et fiables sans mocks manuels fragiles.
+- **CI/CD** : Pipeline **GitLab CI** automatisé avec étapes de :
+  - `analyze` (Linting Dart & TS)
+  - `test` (Unit tests)
+  - `build` (Génération des binaires)
 
 ---
 
 ## 📋 Variables d'environnement
 
-| Clé | Description |
-|---|---|
-| `baseUrl` dans `DioClient` | URL de l'API REST (à remplacer par la vraie URL) |
-| Firebase config | Générée via `flutterfire configure` |
+- **Firebase Config** : Automatisée via `firebase_options.dart`.
+- **FCM Web** : Nécessite `firebase-messaging-sw.js` dans le dossier `web/`.

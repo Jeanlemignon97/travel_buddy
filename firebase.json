@@ -1,1 +1,56 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"travel-buddy-a7cba","appId":"1:589232610494:android:a551223fc23f0645ae52ef","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"travel-buddy-a7cba","appId":"1:589232610494:ios:fc6e1d8b40d36850ae52ef","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"travel-buddy-a7cba","appId":"1:589232610494:ios:fc6e1d8b40d36850ae52ef","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"travel-buddy-a7cba","configurations":{"android":"1:589232610494:android:a551223fc23f0645ae52ef","ios":"1:589232610494:ios:fc6e1d8b40d36850ae52ef","web":"1:589232610494:web:cd3ae166b9df86deae52ef"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "travel-buddy-a7cba",
+          "appId": "1:589232610494:android:a551223fc23f0645ae52ef",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "travel-buddy-a7cba",
+          "appId": "1:589232610494:ios:fc6e1d8b40d36850ae52ef",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "travel-buddy-a7cba",
+          "appId": "1:589232610494:ios:fc6e1d8b40d36850ae52ef",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "travel-buddy-a7cba",
+          "configurations": {
+            "android": "1:589232610494:android:a551223fc23f0645ae52ef",
+            "ios": "1:589232610494:ios:fc6e1d8b40d36850ae52ef",
+            "web": "1:589232610494:web:cd3ae166b9df86deae52ef"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ]
+}

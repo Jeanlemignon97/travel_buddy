@@ -40,6 +40,7 @@ class TravelBuddyApp extends ConsumerWidget {
       title: 'Travel Buddy',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: NotificationService.scaffoldMessengerKey,
       routerConfig: ref.watch(routerProvider),
     );
   }

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 /// Handler de messages Firebase reçus lorsque l'application est en arrière-plan.
@@ -25,6 +25,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 @singleton
 class NotificationService {
   final FirebaseMessaging _messaging;
+
+  /// Clé globale pour afficher des SnackBars sans BuildContext.
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   /// Crée le service en injectant l'instance [FirebaseMessaging].
   NotificationService(this._messaging);
@@ -53,6 +57,14 @@ class NotificationService {
     final token = await _messaging.getToken();
     debugPrint('[FCM] Token: $token');
 
+    // S'abonner au topic pour les notifications de voyage
+    try {
+      await _messaging.subscribeToTopic('travel_updates');
+      debugPrint('[FCM] Abonné au topic : travel_updates');
+    } catch (e) {
+      debugPrint('[FCM] Erreur d\'abonnement au topic : $e');
+    }
+
     // Rafraîchissement du token
     _messaging.onTokenRefresh.listen((newToken) {
       debugPrint('[FCM] Token rafraîchi: $newToken');
@@ -61,11 +73,32 @@ class NotificationService {
     // Messages reçus en premier plan
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('[FCM Foreground] Message reçu: ${message.messageId}');
-      if (message.notification != null) {
-        debugPrint('[FCM Foreground] Titre: ${message.notification!.title}');
-        debugPrint('[FCM Foreground] Corps: ${message.notification!.body}');
+      
+      final notification = message.notification;
+      if (notification != null) {
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notification.title ?? 'Notification',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(notification.body ?? ''),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.blueAccent,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
       }
-      debugPrint('[FCM Foreground] Données: ${message.data}');
     });
 
     // Message ayant ouvert l'application depuis l'arrière-plan
